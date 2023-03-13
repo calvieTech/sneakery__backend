@@ -52,7 +52,7 @@ const getSneakersByUserId = async (req, res, next) => {
 };
 
 const createSneaker = async (req, res, next) => {
-	const errors = validationResult(req);
+	const errors = validationResult(req.body);
 	if (!errors.isEmpty()) {
 		return next(new HttpError("Invalid inputs passed, please check your data.", 422));
 	}
@@ -70,7 +70,7 @@ const createSneaker = async (req, res, next) => {
 		title,
 		description,
 		image:
-			"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1lwDSfI8NvOdQqR3x1HLINnC6eZN_xzm-ZSinDqDBJA&usqp=CAU&ec=48600112",
+			"https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg",
 		creator,
 	});
 

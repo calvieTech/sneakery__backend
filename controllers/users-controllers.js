@@ -21,9 +21,8 @@ const signup = async (req, res, next) => {
 		return next(new HttpError("Invalid inputs passed, please check your data.", 422));
 	}
 
-	const { name, email, password } = req.body;
-	let existingUser,
-		fakeImg = faker.image;
+	const avatar = req.body.image;
+	let existingUser;
 	try {
 		existingUser = await User.findOne({ email: email });
 	} catch (err) {
@@ -39,7 +38,7 @@ const signup = async (req, res, next) => {
 	const createdUser = new User({
 		name,
 		email,
-		image: fakeImg.avatar(),
+		image: avatar,
 		password,
 		places: [],
 	});
