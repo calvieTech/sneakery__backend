@@ -58,6 +58,7 @@ const createSneaker = async (req, res, next) => {
 	}
 
 	const { title, description, creator } = req.body;
+	let imgPath = `http://localhost:3001/uploads/sneakers/${req.file.filename}`;
 
 	// let coordinates;
 	// try {
@@ -69,8 +70,7 @@ const createSneaker = async (req, res, next) => {
 	const createdSneaker = new Sneaker({
 		title,
 		description,
-		image:
-			"https://png.pngtree.com/png-vector/20210604/ourmid/pngtree-gray-network-placeholder-png-image_3416659.jpg",
+		image: imgPath,
 		creator,
 	});
 

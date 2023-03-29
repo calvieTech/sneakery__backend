@@ -12,6 +12,7 @@ const PORT = process.env.PORT;
 const cors = require("cors");
 const app = express();
 const http = require("http");
+const path = require("path");
 
 // SSL setup
 const https = require("https");
@@ -28,9 +29,15 @@ app.use(cors());
 
 app.use(bodyParser.json());
 
+// app.use("/uploads/avatars", () => {
+// 	let p = express.static(path.join)
+// });
+
+app.use("/uploads/avatars", express.static(path.join("uploads", "avatars")));
+app.use("/uploads/sneakers", express.static(path.join("uploads", "sneakers")));
+
 app.use((req, res, next) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Content-Type", "application/json;charset=utf-8");
 	res.setHeader(
 		"Access-Control-Allow-Headers",
 		"Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -48,16 +55,18 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+	console.log("ERROR RESPONSE: ", error.message);
 	if (req.file) {
-		fs.unlink(req.file.path, (err) => {
-			console.log(err.message);
+		fs.unlink(req.file.path, () => {
+			console.log(error.message);
+			// return next(error);
 		});
 	}
 	if (res.headerSent) {
 		return next(error);
 	}
-	res.status(error.code || 500);
-	res.json({ message: error.message || "An unknown error occurred!" });
+	res.status(typeof error.code === "number" ? error.code : 500);
+	res.json({ message: error.message + " in app.js" || "An unknown error occurred! in app.js" });
 });
 
 // For HTTPS ONLY

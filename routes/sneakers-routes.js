@@ -1,5 +1,6 @@
 const express = require("express");
 const { check } = require("express-validator");
+const { fileUploadSneakers } = require("../middleware/file-upload");
 
 const sneakersControllers = require("../controllers/sneakers-controllers");
 
@@ -11,6 +12,7 @@ router.get("/user/:uid", sneakersControllers.getSneakersByUserId);
 
 router.post(
 	"/",
+	fileUploadSneakers.single("sneakerImg"),
 	check("title").not().isEmpty(),
 	check("description").isLength({ min: 5 }),
 	check("address").not().isEmpty(),

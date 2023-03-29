@@ -1,5 +1,7 @@
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+const fs = require("node:fs");
+const path = require("path");
 
 const MIME_TYPE_MAP = {
 	"image/png": "png",
@@ -9,34 +11,43 @@ const MIME_TYPE_MAP = {
 /*
  * Create a multer instance that accepts an options object
  */
-const fileUpload = multer({
-	limits: 1000000,
-	storage: multer.diskStorage({
-		/*
-		 * destination: function that will specify the folder to which the file will been saved to
-		 */
-		destination: (req, file, cb) => {
-			cb(null, "uploads/avatars");
-		},
+const storageAvatars = multer.diskStorage({
+	destination: (req, file, callback) => {
+		let destPath = path.join(__dirname, "../", "./uploads/avatars");
+		callback(null, destPath);
+	},
 
-		/*
-		 * filename: a function that will specify name of the file and extension within the destination
-		 */
-		filename: (req, file, cb) => {
-			const extension = MIME_TYPE_MAP[file.mimetype];
-			cb(null, uuidv4() + "." + extension);
-		},
+	filename: (req, file, callback) => {
+		const extension = MIME_TYPE_MAP[file?.mimetype];
+		callback(null, uuidv4() + "." + extension);
+	},
 
-		/*
-		 * fileFilter: function to control which files are valid and accepted
-		 */
-		fileFilter: (req, file, cb) => {
-			// without the '!!' the following line will return undefined
-			const isFileValid = !!MIME_TYPE_MAP[file.mimetype];
-			let error = isFileValid ? null : new Error("Invalid mime type");
-			cb(error, isFileValid);
-		},
-	}),
+	fileFilter: (req, file, callback) => {
+		const isValidImage = !!MIME_TYPE_MAP[file.mimetype];
+		let error = isValidImage ? null : new Error("Invalid mimetype!");
+		callback(error, isValidImage);
+	},
 });
 
-module.exports = fileUpload;
+const storageSneakers = multer.diskStorage({
+	destination: (req, file, callback) => {
+		let destPath = path.join(__dirname, "../", "./uploads/sneakers");
+		callback(null, destPath);
+	},
+
+	filename: (req, file, callback) => {
+		const extension = MIME_TYPE_MAP[file?.mimetype];
+		callback(null, uuidv4() + "." + extension);
+	},
+
+	fileFilter: (req, file, callback) => {
+		const isValidImage = !!MIME_TYPE_MAP[file.mimetype];
+		let error = isValidImage ? null : new Error("Invalid mimetype!");
+		callback(error, isValidImage);
+	},
+});
+
+const fileUploadAvatars = multer({ storage: storageAvatars });
+const fileUploadSneakers = multer({ storage: storageSneakers });
+
+module.exports = { fileUploadAvatars, fileUploadSneakers };
