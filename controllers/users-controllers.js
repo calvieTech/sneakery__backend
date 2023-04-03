@@ -1,9 +1,11 @@
 const { validationResult } = require("express-validator");
-const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 const { faker } = require("@faker-js/faker");
 const multer = require("multer");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const getUsers = async (req, res, next) => {
 	let users;
@@ -23,7 +25,7 @@ const signup = async (req, res, next) => {
 		return next(new HttpError("Invalid inputs passed, please check your data.", 422));
 	}
 
-	let { name, email, password } = req.body;
+	let { username, email, password } = req.body;
 	let imgPath = `http://localhost:3001/uploads/avatars/${req.file.filename}`;
 	let existingUser;
 
@@ -40,10 +42,20 @@ const signup = async (req, res, next) => {
 		return next(error);
 	}
 
+	let hashedPassword,
+		saltRounds = 6;
+
+	try {
+		hashedPassword = await bcrypt.hash(password, saltRounds);
+	} catch (err) {
+		const error = new HttpError("Could not create user (password maybe?), please try again", 500);
+		return next(error);
+	}
+
 	const createdUser = new User({
-		name,
+		username,
 		email,
-		password,
+		hashedSaltedPassword: hashedPassword,
 		avatar: imgPath,
 		places: [],
 	});
@@ -52,11 +64,33 @@ const signup = async (req, res, next) => {
 		await createdUser.save();
 	} catch (err) {
 		const error = new HttpError("Signing up failed, please try again.", 500);
-		console.log(error.message);
+		console.log(`error1: `, error.message);
 		return next(error);
 	}
 
-	res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+	let userToken,
+		secret_key = `${procss.env.JSON_PRIVATE_TOKEN}`;
+	try {
+		userToken = jwt.sign(
+			{
+				userId: createdUser.id,
+				email: createdUser.email,
+				username: createdUser.username,
+			},
+			secret_key,
+			{ expiresIn: "6h" }
+		);
+	} catch (err) {
+		const error = new HttpError("Signing up failed, please try again.", 500);
+		return next(error);
+	}
+
+	res.status(201).json({
+		userId: createdUser.id,
+		username: createdUser.username,
+		email: createdUser.email,
+		jwt: userToken,
+	});
 };
 
 const login = async (req, res, next) => {
@@ -71,8 +105,38 @@ const login = async (req, res, next) => {
 		return next(error);
 	}
 
-	if (!existingUser || existingUser.password !== password) {
+	if (!existingUser) {
 		const error = new HttpError("Invalid credentials, could not log you in.", 401);
+		return next(error);
+	}
+
+	let isPasswordValid = false;
+	try {
+		isPasswordValid = await bcrypt.compare(password, existingUser.hashedSaltedPassword);
+	} catch (err) {
+		const error = new HttpError("Could not login, please check password", 500);
+		return next(error);
+	}
+
+	if (!isPasswordValid) {
+		const error = new HttpError("Could not login, invalid password", 500);
+		return next(error);
+	}
+
+	let userToken,
+		secret_key = `${procss.env.JSON_PRIVATE_TOKEN}`;
+	try {
+		userToken = jwt.sign(
+			{
+				userId: createdUser.id,
+				email: createdUser.email,
+				username: createdUser.username,
+			},
+			secret_key,
+			{ expiresIn: "6h" }
+		);
+	} catch (err) {
+		const error = new HttpError("Logging in failed, please try again.", 500);
 		return next(error);
 	}
 

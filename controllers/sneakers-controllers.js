@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
-
+const fs = require("fs");
 const HttpError = require("../models/http-error");
 // const getCoordsForAddress = require("../util/location");
 const Sneaker = require("../models/sneaker");
@@ -152,6 +152,9 @@ const deleteSneaker = async (req, res, next) => {
 		return next(error);
 	}
 
+	const sneakerPath = sneaker.image;
+	console.log(`${sneaker.image}`);
+
 	try {
 		// await sneaker.remove().exec();
 		const currentSession = await mongoose.startSession();
@@ -165,6 +168,9 @@ const deleteSneaker = async (req, res, next) => {
 		return next(error);
 	}
 
+	fs.unlink(sneakerPath, (err) => {
+		console.log(err.message);
+	});
 	res.status(200).json({ message: "Deleted sneaker." });
 };
 
