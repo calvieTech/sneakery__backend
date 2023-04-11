@@ -1,7 +1,8 @@
 const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
-const { faker } = require("@faker-js/faker");
+const fs = require("fs");
+const path = require("path");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -26,7 +27,6 @@ const signup = async (req, res, next) => {
 	}
 
 	let { username, email, password } = req.body;
-	let imgPath = `http://localhost:3001/uploads/avatars/${req.file.filename}`;
 	let existingUser;
 
 	try {
@@ -52,30 +52,30 @@ const signup = async (req, res, next) => {
 		return next(error);
 	}
 
+	let imgPath = `http://localhost:3001/uploads/avatars/${req.file.filename}`;
+
 	const createdUser = new User({
 		username,
 		email,
 		hashedSaltedPassword: hashedPassword,
 		avatar: imgPath,
-		places: [],
+		sneakers: [],
 	});
 
 	try {
 		await createdUser.save();
 	} catch (err) {
 		const error = new HttpError("Signing up failed, please try again.", 500);
-		console.log(`error1: `, error.message);
 		return next(error);
 	}
 
 	let userToken,
-		secret_key = `${procss.env.JSON_PRIVATE_TOKEN}`;
+		secret_key = `${process.env.JSON_PRIVATE_TOKEN}`;
 	try {
 		userToken = jwt.sign(
 			{
 				userId: createdUser.id,
 				email: createdUser.email,
-				username: createdUser.username,
 			},
 			secret_key,
 			{ expiresIn: "6h" }
@@ -101,7 +101,7 @@ const login = async (req, res, next) => {
 	try {
 		existingUser = await User.findOne({ email: email });
 	} catch (err) {
-		const error = new HttpError("Logging in failed, please try again later.", 500);
+		const error = new HttpError("Logging in failed, please try again.", 500);
 		return next(error);
 	}
 
@@ -124,13 +124,13 @@ const login = async (req, res, next) => {
 	}
 
 	let userToken,
-		secret_key = `${procss.env.JSON_PRIVATE_TOKEN}`;
+		secret_key = `${process.env.JSON_PRIVATE_TOKEN}`;
+
 	try {
 		userToken = jwt.sign(
 			{
-				userId: createdUser.id,
-				email: createdUser.email,
-				username: createdUser.username,
+				userId: existingUser.id,
+				email: existingUser.email,
 			},
 			secret_key,
 			{ expiresIn: "6h" }
@@ -140,7 +140,11 @@ const login = async (req, res, next) => {
 		return next(error);
 	}
 
-	res.json({ message: "Logged in!", user: existingUser.toObject({ getters: true }) });
+	res.json({
+		userId: existingUser.id,
+		email: existingUser.email,
+		jwt: userToken,
+	});
 };
 
 exports.getUsers = getUsers;

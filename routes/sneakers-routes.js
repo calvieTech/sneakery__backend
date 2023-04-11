@@ -1,6 +1,7 @@
 const express = require("express");
 const { check } = require("express-validator");
 const { fileUploadSneakers } = require("../middleware/file-upload");
+const tokenAuth = require("../middleware/token-auth");
 
 const sneakersControllers = require("../controllers/sneakers-controllers");
 
@@ -10,19 +11,22 @@ router.get("/:pid", sneakersControllers.getSneakerById);
 
 router.get("/user/:uid", sneakersControllers.getSneakersByUserId);
 
+router.use(tokenAuth);
+
 router.post(
 	"/",
 	fileUploadSneakers.single("sneakerImg"),
-	check("title").not().isEmpty(),
-	check("description").isLength({ min: 5 }),
-	check("address").not().isEmpty(),
+	[
+		check("title").not().isEmpty(),
+		check("description").isLength({ min: 5 }),
+		check("address").not().isEmpty(),
+	],
 	sneakersControllers.createSneaker
 );
 
 router.patch(
 	"/:pid",
-	check("title").not().isEmpty(),
-	check("description").isLength({ min: 5 }),
+	[check("title").not().isEmpty(), check("description").isLength({ min: 5 })],
 	sneakersControllers.updateSneaker
 );
 

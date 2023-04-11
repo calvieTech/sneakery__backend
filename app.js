@@ -29,10 +29,6 @@ app.use(cors());
 
 app.use(bodyParser.json());
 
-// app.use("/uploads/avatars", () => {
-// 	let p = express.static(path.join)
-// });
-
 app.use("/uploads/avatars", express.static(path.join("uploads", "avatars")));
 app.use("/uploads/sneakers", express.static(path.join("uploads", "sneakers")));
 
@@ -55,9 +51,10 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
-	console.log("ERROR RESPONSE: ", error.message);
+	console.log("ERROR RESPONSE: ", error);
+	let avatar = path.join("./uploads", "/avatars");
 	if (req.file) {
-		fs.unlink(req.file.path, () => {
+		fs.unlink(avatar, () => {
 			console.log(error.message);
 			// return next(error);
 		});

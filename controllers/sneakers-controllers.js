@@ -6,6 +6,7 @@ const HttpError = require("../models/http-error");
 const Sneaker = require("../models/sneaker");
 const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
+const path = require("path");
 
 const getSneakerById = async (req, res, next) => {
 	const sneakerId = req.params.pid; // { pid: 'p1' }
@@ -25,9 +26,6 @@ const getSneakerById = async (req, res, next) => {
 
 	res.json({ sneaker: sneaker.toObject({ getters: true }) }); // => { sneaker } => { sneaker: sneaker }
 };
-
-// function getSneakerById() { ... }
-// const getSneakerById = function() { ... }
 
 const getSneakersByUserId = async (req, res, next) => {
 	const userId = req.params.uid;
@@ -54,18 +52,12 @@ const getSneakersByUserId = async (req, res, next) => {
 const createSneaker = async (req, res, next) => {
 	const errors = validationResult(req.body);
 	if (!errors.isEmpty()) {
-		return next(new HttpError("Invalid inputs passed, please check your data.", 422));
+		const error = new HttpError("Invalid Inputs, please try again", 422);
+		return next(error);
 	}
 
 	const { title, description, creator } = req.body;
 	let imgPath = `http://localhost:3001/uploads/sneakers/${req.file.filename}`;
-
-	// let coordinates;
-	// try {
-	// 	coordinates = await getCoordsForAddress(address);
-	// } catch (error) {
-	// 	return next(error);
-	// }
 
 	const createdSneaker = new Sneaker({
 		title,
@@ -85,7 +77,7 @@ const createSneaker = async (req, res, next) => {
 
 	if (!user) {
 		const error = new HttpError("Could not find user for provided id", 404);
-		return next(error);
+		return next(error.message);
 	}
 
 	try {
@@ -98,7 +90,7 @@ const createSneaker = async (req, res, next) => {
 		// await createdSneaker.save().exec();
 	} catch (err) {
 		const error = new HttpError("Creating sneaker failed, please try again.", 500);
-		return next(error);
+		return next(error.message);
 	}
 
 	res.status(201).json({ sneaker: createdSneaker });
@@ -151,10 +143,8 @@ const deleteSneaker = async (req, res, next) => {
 		const error = new HttpError("Could not find sneaker for this ID", 404);
 		return next(error);
 	}
-
 	const sneakerPath = sneaker.image;
-	console.log(`${sneaker.image}`);
-
+	const sneakerFile = path.basename(sneakerPath);
 	try {
 		// await sneaker.remove().exec();
 		const currentSession = await mongoose.startSession();
@@ -168,10 +158,17 @@ const deleteSneaker = async (req, res, next) => {
 		return next(error);
 	}
 
-	fs.unlink(sneakerPath, (err) => {
-		console.log(err.message);
+	let unlinkSneakerPath = path.join(`${__dirname}`, "../", "./uploads/sneakers", `${sneakerFile}`);
+
+	fs.unlink(unlinkSneakerPath, (err) => {
+		if (err) {
+			const error = new HttpError(`Could not delete sneaker file at ${sneaker.image}`);
+			console.log("error: ", error.message);
+			return next(error.message);
+		}
+
+		res.status(200).json({ message: "Deleted sneaker." });
 	});
-	res.status(200).json({ message: "Deleted sneaker." });
 };
 
 exports.getSneakerById = getSneakerById;
