@@ -112,6 +112,11 @@ const updateSneaker = async (req, res, next) => {
 		return next(error);
 	}
 
+	if (sneaker.creator.toString() !== req.userData.userId) {
+		const error = new HttpError("Invalid authorization, cannot edit sneaker", 401);
+		return next(error);
+	}
+
 	sneaker.title = title;
 	sneaker.description = description;
 
@@ -135,7 +140,7 @@ const deleteSneaker = async (req, res, next) => {
 	try {
 		sneaker = await Sneaker.findById(sneakerId).populate("creator").exec();
 	} catch (err) {
-		const error = new HttpError("Something went wrong, could not delete sneaker.", 500);
+		const error = new HttpError("Something went wrong, could not find sneaker in MongoDB.", 500);
 		return next(error);
 	}
 
@@ -143,8 +148,18 @@ const deleteSneaker = async (req, res, next) => {
 		const error = new HttpError("Could not find sneaker for this ID", 404);
 		return next(error);
 	}
+
+	if (sneaker.creator.id !== req.userData.userId) {
+		const error = new HttpError(
+			"Client needs to authenticate to gain access to update this sneaker",
+			511
+		);
+		return next(error);
+	}
+
 	const sneakerPath = sneaker.image;
 	const sneakerFile = path.basename(sneakerPath);
+
 	try {
 		// await sneaker.remove().exec();
 		const currentSession = await mongoose.startSession();
@@ -163,11 +178,10 @@ const deleteSneaker = async (req, res, next) => {
 	fs.unlink(unlinkSneakerPath, (err) => {
 		if (err) {
 			const error = new HttpError(`Could not delete sneaker file at ${sneaker.image}`);
-			console.log("error: ", error.message);
-			return next(error.message);
+			return next(error);
 		}
 
-		res.status(200).json({ message: "Deleted sneaker." });
+		res.status(200).json({ message: "Deleted sneaker!" });
 	});
 };
 

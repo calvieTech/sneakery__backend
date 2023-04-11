@@ -63,7 +63,7 @@ app.use((error, req, res, next) => {
 		return next(error);
 	}
 	res.status(typeof error.code === "number" ? error.code : 500);
-	res.json({ message: error.message + " in app.js" || "An unknown error occurred! in app.js" });
+	res.json({ message: error + " in app.js" || "An unknown error occurred! in app.js" });
 });
 
 // For HTTPS ONLY

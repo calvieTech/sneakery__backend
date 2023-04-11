@@ -78,7 +78,7 @@ const signup = async (req, res, next) => {
 				email: createdUser.email,
 			},
 			secret_key,
-			{ expiresIn: "6h" }
+			{ expiresIn: "1h" }
 		);
 	} catch (err) {
 		const error = new HttpError("Signing up failed, please try again.", 500);
@@ -106,7 +106,7 @@ const login = async (req, res, next) => {
 	}
 
 	if (!existingUser) {
-		const error = new HttpError("Invalid credentials, could not log you in.", 401);
+		const error = new HttpError("Invalid credentials, could not log you in.", 403);
 		return next(error);
 	}
 
