@@ -52,7 +52,10 @@ const signup = async (req, res, next) => {
 		return next(error);
 	}
 
-	let imgPath = `http://localhost:3001/uploads/avatars/${req.file.filename}`;
+	let imgPath =
+		process.env.NODE_ENV === "development"
+			? `http://localhost:3001/uploads/avatars/${req.file.filename}`
+			: `https://calvietech.com/api/uploads/avatars/${req.file.filename}`;
 
 	const createdUser = new User({
 		username,

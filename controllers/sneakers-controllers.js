@@ -57,7 +57,9 @@ const createSneaker = async (req, res, next) => {
 	}
 
 	const { title, description, creator } = req.body;
-	let imgPath = `http://localhost:3001/uploads/sneakers/${req.file.filename}`;
+
+
+	let imgPath = process.env.NODE_ENV === 'development' ? `http://localhost:3001/uploads/sneakers/${req.file.filename}` : `https://calvietech.com/api/uploads/sneakers/${req.file.filename}`;
 
 	const createdSneaker = new Sneaker({
 		title,
