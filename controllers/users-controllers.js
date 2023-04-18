@@ -81,7 +81,7 @@ const signup = async (req, res, next) => {
 				email: createdUser.email,
 			},
 			secret_key,
-			{ expiresIn: "60" }
+			{ expiresIn: "3h" }
 		);
 	} catch (err) {
 		const error = new HttpError("Signing up failed, please try again.", 500);
@@ -136,7 +136,7 @@ const login = async (req, res, next) => {
 				email: existingUser.email,
 			},
 			secret_key,
-			{ expiresIn: "60" }
+			{ expiresIn: "1h" }
 		);
 	} catch (err) {
 		const error = new HttpError("Logging in failed, please try again.", 500);

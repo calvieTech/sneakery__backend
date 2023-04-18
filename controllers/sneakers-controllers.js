@@ -56,22 +56,24 @@ const createSneaker = async (req, res, next) => {
 		return next(error);
 	}
 
-	const { title, description, creator } = req.body;
+	const { title, description } = req.body;
 
-
-	let imgPath = process.env.NODE_ENV === 'development' ? `http://localhost:3001/uploads/sneakers/${req.file.filename}` : `https://calvietech.com/api/uploads/sneakers/${req.file.filename}`;
+	let imgPath =
+		process.env.NODE_ENV === "development"
+			? `http://localhost:3001/uploads/sneakers/${req.file.filename}`
+			: `https://${window.location.hostname}.com/api/uploads/sneakers/${req.file.filename}`;
 
 	const createdSneaker = new Sneaker({
 		title,
 		description,
 		image: imgPath,
-		creator,
+		creator: req.userData.userId,
 	});
 
 	let user;
 
 	try {
-		user = await User.findById(creator).exec();
+		user = await User.findById(createdSneaker.creator).exec();
 	} catch (err) {
 		const error = new HttpError("Creating sneaker failed, please try again", 500);
 		return next(error);
