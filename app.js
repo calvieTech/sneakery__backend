@@ -13,6 +13,7 @@ const cors = require("cors");
 const app = express();
 const http = require("http");
 const path = require("path");
+const baseURL = process.env.baseURL;
 
 // SSL setup
 const https = require("https");
@@ -29,7 +30,7 @@ app.use(cors());
 
 app.use(bodyParser.json());
 
-app.use("/uploads/avatars", express.static(path.join("uploads", "avatars")));
+app.use(`/uploads/avatars`, express.static(path.join("uploads", "avatars")));
 app.use("/uploads/sneakers", express.static(path.join("uploads", "sneakers")));
 
 app.use((req, res, next) => {
@@ -42,8 +43,8 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use("/api/sneakers", sneakersRoutes); // => /api/sneakers...
-app.use("/api/users", usersRoutes);
+app.use("/sneakers", sneakersRoutes); // => /api/sneakers...
+app.use("/users", usersRoutes);
 
 app.use((req, res, next) => {
 	const error = new HttpError("Could not find this route.", 404);
