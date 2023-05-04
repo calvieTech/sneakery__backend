@@ -60,8 +60,8 @@ const createSneaker = async (req, res, next) => {
 
 	let imgPath =
 		process.env.NODE_ENV === "development"
-			? `http://${window.location.hostname}/uploads/sneakers/${req.file.filename}`
-			: `https://${process.env.SNEAKERY_BACKEND_BASE_URL}/uploads/sneakers/${req.file.filename}`;
+			? `http://localhost:3001/uploads/sneakers/${req.file.filename}`
+			: `${process.env.SNEAKERY_BACKEND_ASSET_URL}/sneakers/${req.file.filename}`;
 
 	const createdSneaker = new Sneaker({
 		title,

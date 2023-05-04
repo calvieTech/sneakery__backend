@@ -30,7 +30,7 @@ app.use(cors());
 
 app.use(bodyParser.json());
 
-app.use(`/uploads/avatars`, express.static(path.join("uploads", "avatars")));
+app.use("/uploads/avatars", express.static(path.join("uploads", "avatars")));
 app.use("/uploads/sneakers", express.static(path.join("uploads", "sneakers")));
 
 app.use((req, res, next) => {
