@@ -59,7 +59,7 @@ const createSneaker = async (req, res, next) => {
 	const { title, description } = req.body;
 
 	let imgPath =
-		process.env.NODE_ENV === "development"
+		process.env.NODE_ENV !== "development"
 			? `http://localhost:3001/uploads/sneakers/${req.file.filename}`
 			: `${process.env.SNEAKERY_BACKEND_ASSET_URL}/sneakers/${req.file.filename}`;
 
