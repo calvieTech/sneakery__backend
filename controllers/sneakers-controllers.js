@@ -1,8 +1,6 @@
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const fs = require("fs");
 const HttpError = require("../models/http-error");
-// const getCoordsForAddress = require("../util/location");
 const Sneaker = require("../models/sneaker");
 const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
@@ -61,7 +59,7 @@ const createSneaker = async (req, res, next) => {
 	let imgPath =
 		process.env.NODE_ENV === "development"
 			? `http://localhost:3001/uploads/sneakers/${req.file.filename}`
-			: `${process.env.SNEAKERY_BACKEND_ASSET_URL}/sneakers/${req.file.filename}`;
+			: `http://${window.location.hostname}/uploads/sneakers/${req.file.filename}`;
 
 	const createdSneaker = new Sneaker({
 		title,
