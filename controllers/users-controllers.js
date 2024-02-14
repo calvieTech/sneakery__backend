@@ -54,8 +54,8 @@ const signup = async (req, res, next) => {
 
 	let imgPath =
 		process.env.NODE_ENV === "development"
-			? `http://localhost:3001/uploads/avatars/${req.file.filename}`
-			: `${process.env.BACKEND_BASE_URL}/uploads/avatars/${req.file.filename}`;
+			? `http://localhost:3001/api/uploads/avatars/${req.file.filename}`
+			: `${process.env.BACKEND_BASE_URL}/api/uploads/avatars/${req.file.filename}`;
 
 	const createdUser = new User({
 		username,
